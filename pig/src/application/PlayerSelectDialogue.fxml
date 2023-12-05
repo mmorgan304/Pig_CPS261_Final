@@ -65,8 +65,8 @@
                <children>
                   <Label text="Player 1" />
                   <Label text="Player 2" GridPane.columnIndex="1" />
-                  <ComboBox prefWidth="150.0" GridPane.rowIndex="1" />
-                  <ComboBox prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <ComboBox fx:id="player1ComboBox" onMouseClicked="#handlePlayer1List" prefWidth="150.0" GridPane.rowIndex="1" />
+                  <ComboBox fx:id="player2ComboBox" onMouseClicked="#handlePlayer2List" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                </children>
             </GridPane>
             <StackPane>
@@ -83,7 +83,7 @@
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                      </rowConstraints>
                      <children>
-                        <Button mnemonicParsing="false" text="Create New Player" GridPane.columnIndex="1" />
+                        <Button fx:id="createNewPlayerButton" mnemonicParsing="false" onMouseClicked="#openPlayerCreateDialogue" text="Create New Player" GridPane.columnIndex="1" />
                         <Button mnemonicParsing="false" text="New Game" />
                      </children>
                   </GridPane>

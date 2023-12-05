@@ -46,7 +46,6 @@ public class PigController {
 			Stage mainStage = (Stage) player1DieFace.getScene().getWindow();
 		    playerSelect.initOwner(mainStage);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			System.out.println("didn't work");
 		}
