@@ -21,7 +21,7 @@ public class Main extends Application {
 	public void start(Stage primaryStage) {
 		try {
 			// Loading the game and player data from file
-	        ArrayList<Game> loadedGameResults = loadGameResultsFromFile();
+	        ArrayList<CompletedGame> loadedGameResults = loadGameResultsFromFile();
 	        ArrayList<Player> loadedPlayers = loadPlayersFromFile();
 	        DataManager.getInstance().setGameResults(loadedGameResults);
 	        DataManager.getInstance().setPlayers(loadedPlayers);
@@ -37,11 +37,10 @@ public class Main extends Application {
 			PigController pigController = loader.getController();
 			pigController.displayPlayerSelect();
 
-			// Closing the program
+			// Closing the program - Saving game and player data
 			primaryStage.setOnCloseRequest(event -> {
 				writeGameResultsToFile();
 				writePlayersToFile();
-				System.out.println("closing the thing");
 				Platform.exit();
 				System.exit(0);
 			});
@@ -69,12 +68,12 @@ public class Main extends Application {
 		return playerList;
 	}
 
-	public ArrayList<Game> loadGameResultsFromFile() {
-		ArrayList<Game> gameResults = new ArrayList<Game>();
+	public ArrayList<CompletedGame> loadGameResultsFromFile() {
+		ArrayList<CompletedGame> gameResults = new ArrayList<CompletedGame>();
 		try (ObjectInputStream readGameFile = new ObjectInputStream(new FileInputStream("GameData"))){
 			while (true) {
 				try {
-					Game game = (Game) readGameFile.readObject();
+					CompletedGame game = (CompletedGame) readGameFile.readObject();
 					gameResults.add(game);
 				} catch (EOFException | ClassNotFoundException e) {
 					break;
@@ -110,7 +109,7 @@ public class Main extends Application {
 
 	public void writeGameResultsToFile() {
 		try (ObjectOutputStream writeGameFile = new ObjectOutputStream(new FileOutputStream("GameData"))){
-			ArrayList<Game> gameResultsList = DataManager.getInstance().getGameResults();
+			ArrayList<CompletedGame> gameResultsList = DataManager.getInstance().getGameResults();
 			gameResultsList.forEach(game -> {
 				try {
 					writeGameFile.writeObject(game);

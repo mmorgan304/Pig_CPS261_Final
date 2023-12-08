@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class DataManager {
 	private static final DataManager instance = new DataManager();
-    private ArrayList<Game> gameResults;
+    private ArrayList<CompletedGame> gameResults;
     private ArrayList<Player> players;
 
     private DataManager() {
@@ -16,11 +16,11 @@ public class DataManager {
         return instance;
     }
 
-    public ArrayList<Game> getGameResults() {
+    public ArrayList<CompletedGame> getGameResults() {
         return gameResults;
     }
 
-    public void setGameResults(ArrayList<Game> gameResults) {
+    public void setGameResults(ArrayList<CompletedGame> gameResults) {
         this.gameResults = gameResults;
     }
 
@@ -31,4 +31,5 @@ public class DataManager {
     public void setPlayers(ArrayList<Player> players) {
         this.players = players;
     }
+    
 }

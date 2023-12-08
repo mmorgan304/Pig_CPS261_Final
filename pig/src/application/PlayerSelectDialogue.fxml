@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -44,8 +45,11 @@
             </GridPane>
             <VBox>
                <children>
-                  <RadioButton mnemonicParsing="false" text="VS Computer" />
-                  <RadioButton mnemonicParsing="false" text="Two-Player Game" />
+                  <RadioButton fx:id="onePlayerGameToggle" mnemonicParsing="false" text="VS Computer">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="gameTypeSelection" />
+                     </toggleGroup></RadioButton>
+                  <RadioButton fx:id="twoPlayerGameToggle" mnemonicParsing="false" text="Two-Player Game" toggleGroup="$gameTypeSelection" />
                </children>
             </VBox>
             <StackPane>
@@ -84,7 +88,7 @@
                      </rowConstraints>
                      <children>
                         <Button fx:id="createNewPlayerButton" mnemonicParsing="false" onMouseClicked="#openPlayerCreateDialogue" text="Create New Player" GridPane.columnIndex="1" />
-                        <Button mnemonicParsing="false" text="New Game" />
+                        <Button fx:id="newGameButton" mnemonicParsing="false" onMouseClicked="#startNewGame" text="New Game" />
                      </children>
                   </GridPane>
                </children>
