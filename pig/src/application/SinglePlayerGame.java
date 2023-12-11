@@ -18,12 +18,14 @@ public class SinglePlayerGame extends Game {
 	    this.player2 = computer;	
 	}
 	
-	public void playGame() {
+	// superclass methods dieRoll
+	public void computerTurn() {
 		
 	}
-	
-	// superclass methods humanTurn, dieRoll
-	public void computerTurn() {
+
+	@Override
+	public void playGame() {
+		// TODO Auto-generated method stub
 		
 	}
 

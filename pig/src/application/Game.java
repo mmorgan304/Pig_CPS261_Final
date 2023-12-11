@@ -4,16 +4,16 @@ import java.util.Date;
 import java.util.Random;
 
 public abstract class Game {
+	protected ControlsListener controlsListener;
 	static Random die = new Random();
 	protected Player player1;
 	protected Player player2;
-	private boolean isPlayer1Active;
-	private boolean isPlayer2Active;
 	protected Date gameDate;
 	protected Player winner;
+	protected Player loser;
 	private Integer player1Score;
 	private Integer player2Score;
-	
+
 	public Game(Date gameDate) {
 		super();
 		this.gameDate = gameDate;
@@ -35,22 +35,6 @@ public abstract class Game {
 		this.player2 = player2;
 	}
 
-	public boolean isPlayer1Active() {
-		return isPlayer1Active;
-	}
-
-	public void setPlayer1Active(boolean isPlayer1Active) {
-		this.isPlayer1Active = isPlayer1Active;
-	}
-
-	public boolean isPlayer2Active() {
-		return isPlayer2Active;
-	}
-
-	public void setPlayer2Active(boolean isPlayer2Active) {
-		this.isPlayer2Active = isPlayer2Active;
-	}
-
 	public Date getGameDate() {
 		return gameDate;
 	}
@@ -65,6 +49,14 @@ public abstract class Game {
 
 	public void setWinner(Player winner) {
 		this.winner = winner;
+	}
+
+	public Player getLoser() {
+		return loser;
+	}
+
+	public void setLoser(Player loser) {
+		this.loser = loser;
 	}
 
 	public Integer getPlayer1Score() {
@@ -83,29 +75,63 @@ public abstract class Game {
 		this.player2Score = player2Score;
 	}
 
-	public static int dieRoll() {
-		return die.nextInt(6)+1;
+	public void setControlsListener(ControlsListener controlsListener) {
+		this.controlsListener = controlsListener;
 	}
-	
-	public void humanTurn(Player activePlayer) {
-		while (activePlayer.isActive()) {
-			// wait for button press?
-			int currentRoll = dieRoll();
-			if (currentRoll == 1) {
-				activePlayer.setTurnTotal(0);
-				activePlayer.setGameTotal(activePlayer.getGameTotal()+activePlayer.getTurnTotal());
-				activePlayer.setActive(false);
-			} else if (currentRoll > 1) {
-				activePlayer.setTurnTotal(activePlayer.getTurnTotal()+currentRoll);
-			}
-		}
+
+	public Integer dieRoll() {
+		return die.nextInt(6) + 1;
 	}
-	
+
+	public void endTurn() {
+		checkWinner();
+		switchActivePlayer();
+	}
+
+	public void onEndTurn() {
+		endTurn();
+	}
+
 	public Player getActivePlayer() {
 		if (player1.isActive()) {
 			return player1;
-		} else return player2;
+		} else
+			return player2;
 	}
-	
+
+	public void switchActivePlayer() {
+		if (player1.isActive()) {
+			switchPlayer(player1, player2);
+		} else if (player2.isActive()) {
+			switchPlayer(player2, player1);
+		}
+	}
+
+	private void switchPlayer(Player currentPlayer, Player nextPlayer) {
+		currentPlayer.setActive(false);
+		nextPlayer.setActive(true);
+	}
+
+	public void setPlayerGameScore(Integer gameTotal) {
+		if (player1.isActive()) {
+			player1.setGameTotal(gameTotal);
+		} else if (player2.isActive()) {
+			player2.setGameTotal(gameTotal);
+		}
+	}
+
+	public void checkWinner() {
+		if (player1.getGameTotal() >= 100) {
+			setWinner(player1);
+			setLoser(player2);
+		} else if (player2.getGameTotal() >= 100) {
+			setWinner(player2);
+			setLoser(player1);
+		}
+		if (getWinner() != null) {
+			System.out.println(getWinner().getPlayerName() + " wins!");
+		}
+	}
+
 	public abstract void playGame();
 }

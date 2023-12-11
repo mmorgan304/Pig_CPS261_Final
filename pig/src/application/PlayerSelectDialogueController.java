@@ -17,7 +17,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class PlayerSelectDialogueController {
+public class PlayerSelectDialogueController implements GameReadyCallback{
 
 	ArrayList<Player> players = DataManager.getInstance().getPlayers();
 	private PigController pigController;
@@ -106,9 +106,9 @@ public class PlayerSelectDialogueController {
 					Date currentDate = new Date();
 					Player selectedPlayer = Player.getPlayerByName(selectedPlayerName, players);
 					SinglePlayerGame newGame = new SinglePlayerGame(currentDate, selectedPlayer);
-					pigController.setGame(newGame);
-					Stage stage = (Stage) newGameButton.getScene().getWindow();
-					stage.close();
+					pigController.setGame(newGame, this);
+//					Stage stage = (Stage) newGameButton.getScene().getWindow();
+//					stage.close();
 				} else {
 					System.out.println("Please select a player for the game.");
 				}
@@ -121,9 +121,9 @@ public class PlayerSelectDialogueController {
 					Player selectedPlayer1 = Player.getPlayerByName(selectedPlayer1Name, players);
 					Player selectedPlayer2 = Player.getPlayerByName(selectedPlayer2Name, players);
 					TwoPlayerGame newGame = new TwoPlayerGame(currentDate, selectedPlayer1, selectedPlayer2);
-					pigController.setGame(newGame);
-					Stage stage = (Stage) newGameButton.getScene().getWindow();
-					stage.close();
+					pigController.setGame(newGame, this);
+//					Stage stage = (Stage) newGameButton.getScene().getWindow();
+//					stage.close();
 
 				} else {
 					System.out.println("Please select a player for the game.");
@@ -135,5 +135,14 @@ public class PlayerSelectDialogueController {
 		}
 
 	}
+
+	@Override
+	public void onGameReady() {
+		Stage stage = (Stage) newGameButton.getScene().getWindow();
+		stage.close();
+		pigController.playGame();
+	}
+	
+	
 
 }
