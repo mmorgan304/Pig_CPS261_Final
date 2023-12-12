@@ -9,10 +9,17 @@ public class CompletedGame implements Serializable {
 	 */
 	private static final long serialVersionUID = 3997838651077916682L;
 	private Date gameDate;
-	private Player winner;
-	private Player loser;
-	private Integer winningScore;
-	private Integer losingScore;
+	private Player player;
+	private Integer playersScore;
+	private boolean isWinner;
+
+	public CompletedGame(Date gameDate, Player player, Integer playersScore, boolean isWinner) {
+		super();
+		this.gameDate = gameDate;
+		this.player = player;
+		this.playersScore = playersScore;
+		this.isWinner = isWinner;
+	}
 
 	public Date getGameDate() {
 		return gameDate;
@@ -22,45 +29,29 @@ public class CompletedGame implements Serializable {
 		this.gameDate = gameDate;
 	}
 
-	public Player getWinner() {
-		return winner;
+	public Player getPlayer() {
+		return player;
 	}
 
-	public void setWinner(Player winner) {
-		this.winner = winner;
+	public void setPlayer(Player player) {
+		this.player = player;
 	}
 
-	public Player getLoser() {
-		return loser;
+	public Integer getPlayersScore() {
+		return playersScore;
 	}
 
-	public void setLoser(Player loser) {
-		this.loser = loser;
+	public void setPlayersScore(Integer playersScore) {
+		this.playersScore = playersScore;
 	}
 
-	public Integer getWinningScore() {
-		return winningScore;
+	public boolean isWinner() {
+		return isWinner;
 	}
 
-	public void setWinningScore(Integer winningScore) {
-		this.winningScore = winningScore;
+	public void setWinner(boolean isWinner) {
+		this.isWinner = isWinner;
 	}
 
-	public Integer getLosingScore() {
-		return losingScore;
-	}
-
-	public void setLosingScore(Integer losingScore) {
-		this.losingScore = losingScore;
-	}
-
-	public CompletedGame(Date gameDate, Player winner, Player loser, Integer winningScore, Integer losingScore) {
-		super();
-		this.gameDate = gameDate;
-		this.winner = winner;
-		this.loser = loser;
-		this.winningScore = winningScore;
-		this.losingScore = losingScore;
-	}
 	
 }

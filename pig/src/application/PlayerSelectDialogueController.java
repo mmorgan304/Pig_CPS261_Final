@@ -27,6 +27,8 @@ public class PlayerSelectDialogueController implements GameReadyCallback{
 	@FXML
 	public Button newGameButton;
 	@FXML
+	public Button viewStatisticsButton;
+	@FXML
 	public ComboBox<String> player1ComboBox;
 	@FXML
 	public ComboBox<String> player2ComboBox;
@@ -83,6 +85,21 @@ public class PlayerSelectDialogueController implements GameReadyCallback{
 			e.printStackTrace();
 		}
 	}
+	
+	public void openDisplayGameHistory() throws IOException {
+		AnchorPane createPlayerDialogue = (AnchorPane) FXMLLoader
+				.load(getClass().getResource("DisplayGameHistory.fxml"));
+		Stage displayGameHistory = new Stage();
+		displayGameHistory.setScene(new Scene(createPlayerDialogue, 400, 500));
+		displayGameHistory.initModality(Modality.APPLICATION_MODAL);
+		try {
+			Stage playerSelect = (Stage) viewStatisticsButton.getScene().getWindow();
+			displayGameHistory.initOwner(playerSelect);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		displayGameHistory.show();
+	}
 
 	public void handlePlayer1List() throws IOException, ClassNotFoundException {
 		ArrayList<String> playerNameStrings = new ArrayList<String>();
@@ -107,8 +124,6 @@ public class PlayerSelectDialogueController implements GameReadyCallback{
 					Player selectedPlayer = Player.getPlayerByName(selectedPlayerName, players);
 					SinglePlayerGame newGame = new SinglePlayerGame(currentDate, selectedPlayer);
 					pigController.setGame(newGame, this);
-//					Stage stage = (Stage) newGameButton.getScene().getWindow();
-//					stage.close();
 				} else {
 					System.out.println("Please select a player for the game.");
 				}
@@ -122,8 +137,6 @@ public class PlayerSelectDialogueController implements GameReadyCallback{
 					Player selectedPlayer2 = Player.getPlayerByName(selectedPlayer2Name, players);
 					TwoPlayerGame newGame = new TwoPlayerGame(currentDate, selectedPlayer1, selectedPlayer2);
 					pigController.setGame(newGame, this);
-//					Stage stage = (Stage) newGameButton.getScene().getWindow();
-//					stage.close();
 
 				} else {
 					System.out.println("Please select a player for the game.");

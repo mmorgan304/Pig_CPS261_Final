@@ -3,6 +3,8 @@ package application;
 import java.util.Date;
 import java.util.Random;
 
+import javafx.application.Platform;
+
 public abstract class Game {
 	protected ControlsListener controlsListener;
 	static Random die = new Random();
@@ -112,14 +114,6 @@ public abstract class Game {
 		nextPlayer.setActive(true);
 	}
 
-	public void setPlayerGameScore(Integer gameTotal) {
-		if (player1.isActive()) {
-			player1.setGameTotal(gameTotal);
-		} else if (player2.isActive()) {
-			player2.setGameTotal(gameTotal);
-		}
-	}
-
 	public void checkWinner() {
 		if (player1.getGameTotal() >= 100) {
 			setWinner(player1);
@@ -133,5 +127,62 @@ public abstract class Game {
 		}
 	}
 
-	public abstract void playGame();
+	public void setPlayerGameScore(Integer gameTotal) {
+		if (player1.isActive()) {
+			player1.setGameTotal(gameTotal);
+		} else if (player2.isActive()) {
+			player2.setGameTotal(gameTotal);
+		}
+	}
+
+	public void humanTurn() {
+		Integer result = dieRoll();
+		getActivePlayer().setCurrentRoll(result);
+		if (result == 1) {
+			getActivePlayer().setTurnTotal(0);
+			playerEndTurn();
+		} else if (result > 1) {
+			getActivePlayer().setTurnTotal(getActivePlayer().getTurnTotal() + result);
+		}
+	}
+
+	public void playerEndTurn() {
+		getActivePlayer().setGameTotal(getActivePlayer().getGameTotal() + getActivePlayer().getTurnTotal());
+		setPlayerGameScore(getActivePlayer().getGameTotal());
+		switchActivePlayer();
+		getActivePlayer().setCurrentRoll(0);
+		System.out.println("I set current roll to 0");
+		getActivePlayer().setTurnTotal(0);
+		System.out.println("I set turn total to 0");
+		controlsListener.updateUIAfterTurn();
+	}
+
+	public void playGame() {
+		player1.setActive(true);
+		player2.setActive(false);
+		controlsListener.onDieRoll();
+	}
+
+	public void computerTurn() {
+		while (player2.isActive()) {
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			Integer result = dieRoll();
+			getActivePlayer().setCurrentRoll(result);
+			if (result == 1) {
+				getActivePlayer().setTurnTotal(0);
+				playerEndTurn();
+			} else if (result > 1) {
+				getActivePlayer().setTurnTotal(getActivePlayer().getTurnTotal() + result);
+				controlsListener.updateUIAfterTurn();
+				if (getActivePlayer().getTurnTotal() >= 20) {
+					playerEndTurn();
+				}
+			}
+		}
+	}
 }

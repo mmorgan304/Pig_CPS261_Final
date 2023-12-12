@@ -16,11 +16,4 @@ public class TwoPlayerGame extends Game {
 		player2.setGameTotal(0);
 	}
 
-	public void playGame() {
-		player1.setActive(true);
-		player2.setActive(false);
-		controlsListener.onDieRoll();
-		controlsListener.onTurnEnd();
-	}
-
 }

@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -19,7 +22,10 @@ public class PigController implements ControlsListener {
 
 	ArrayList<CompletedGame> games = DataManager.getInstance().getGameResults();
 	private Game currentGame;
-
+	
+	@FXML
+	private MenuBar menuBar;
+	
 	@FXML
 	private ImageView player1DieFace;
 	@FXML
@@ -48,6 +54,11 @@ public class PigController implements ControlsListener {
 
 	@FXML
 	private Image die1 = new Image("orange1.png");
+	
+	public void newGameMenuItem() throws IOException {
+		this.currentGame = null;
+		displayPlayerSelect();
+	}
 
 	public void displayPlayerSelect() throws IOException {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("PlayerSelectDialogue.fxml"));
@@ -69,6 +80,27 @@ public class PigController implements ControlsListener {
 
 		playerSelect.show();
 	}
+	
+	public void openDisplayGameHistory() throws IOException {
+		AnchorPane createPlayerDialogue = (AnchorPane) FXMLLoader
+				.load(getClass().getResource("DisplayGameHistory.fxml"));
+		Stage displayGameHistory = new Stage();
+		displayGameHistory.setScene(new Scene(createPlayerDialogue, 400, 500));
+		displayGameHistory.initModality(Modality.APPLICATION_MODAL);
+		try {
+			Stage playerSelect = (Stage) menuBar.getScene().getWindow();
+			displayGameHistory.initOwner(playerSelect);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		displayGameHistory.show();
+	}
+		
+	public void quitGameMenuItem() {
+	    Stage stage  = (Stage) menuBar.getScene().getWindow();
+	    stage.getOnCloseRequest().handle(null);
+	    stage.close();
+	}
 
 	public void initialize() throws IOException {
 		player1DieFace.setImage(die1);
@@ -89,14 +121,11 @@ public class PigController implements ControlsListener {
 		player2DieText.setText(game.player2.getPlayerName());
 		player1ScoreNameText.setText(game.player1.getPlayerName());
 		player2ScoreNameText.setText(game.player2.getPlayerName());
-		turnIndicatorText.setText(game.getActivePlayer().getPlayerName() + "'s Turn");
-		currentRollText.setText(game.getActivePlayer().getCurrentRoll().toString());
-		turnTotalText.setText(game.getActivePlayer().getTurnTotal().toString());
+		updateUIAfterTurn();
 		callback.onGameReady();
 	}
 
 	public void rollAgain() {
-		// update UI
 		this.onDieRoll();
 	}
 
@@ -110,41 +139,49 @@ public class PigController implements ControlsListener {
 
 	public void endGame() {
 		Date date = new Date();
-		CompletedGame completedGame = new CompletedGame(date, currentGame.getWinner(), currentGame.getLoser(),
-				currentGame.getWinner().getGameTotal(), currentGame.getLoser().getGameTotal());
-		games.add(completedGame);
+		games.add(new CompletedGame(date, currentGame.getWinner(), currentGame.getWinner().getGameTotal(), true));
+		games.add(new CompletedGame(date, currentGame.getLoser(), currentGame.getLoser().getGameTotal(), false));
 	}
 
 	@Override
 	public void onDieRoll() {
 		System.out.println(currentGame.getPlayer1().getPlayerName() + ": " + currentGame.player1.getGameTotal());
 		System.out.println(currentGame.getPlayer2().getPlayerName() + ": " + currentGame.player2.getGameTotal());
-		Integer result = currentGame.dieRoll();
-		currentGame.getActivePlayer().setCurrentRoll(result);
-		if (result == 1) {
-			currentGame.getActivePlayer().setTurnTotal(0);
-			endTurn();
-		} else if (result > 1) {
-			currentGame.getActivePlayer().setTurnTotal(currentGame.getActivePlayer().getTurnTotal() + result);
+		if (currentGame.getActivePlayer() instanceof ComputerPlayer) {
+		} else {
+			System.out.println("from onDieRoll: it's still your turn");
+			updateUIAfterTurn();
+			currentGame.humanTurn();
+			updateUIAfterTurn();
 		}
-		turnIndicatorText.setText(currentGame.getActivePlayer().getPlayerName());
-		currentRollText.setText(currentGame.getActivePlayer().getCurrentRoll().toString());
-		turnTotalText.setText(currentGame.getActivePlayer().getTurnTotal().toString());
 	}
 
 	@Override
 	public void onTurnEnd() {
-		currentGame.getActivePlayer().setGameTotal(currentGame.getActivePlayer().getGameTotal()+currentGame.getActivePlayer().getTurnTotal());
-		currentGame.setPlayerGameScore(currentGame.getActivePlayer().getGameTotal());
-		currentGame.switchActivePlayer();
-		currentGame.getActivePlayer().setTurnTotal(0);
-		currentRollText.setText(currentGame.getActivePlayer().getCurrentRoll().toString());
-		turnTotalText.setText(currentGame.getActivePlayer().getTurnTotal().toString());
-		turnIndicatorText.setText(currentGame.getActivePlayer().getPlayerName());
+		currentGame.playerEndTurn();
+		updateUIAfterTurn();
+		triggerComputerTurn();
 		currentGame.checkWinner();
+    	System.out.println("from onTurnEnd: it's your turn");
+    	updateUIAfterTurn();
 		if (currentGame.getWinner() != null) {
 			endGame();
 		}
+	}
+	
+	public void triggerComputerTurn() {
+	    if (currentGame.getActivePlayer() instanceof ComputerPlayer) {
+	    	System.out.println("from triggerComputerTurn: it's the computer's turn");
+	    	updateUIAfterTurn();
+	        currentGame.computerTurn();
+	    }
+	}
+	
+	@Override
+	public void updateUIAfterTurn() {
+		turnIndicatorText.setText(currentGame.getActivePlayer().getPlayerName() + "'s Turn"); // must be here
+		currentRollText.setText(currentGame.getActivePlayer().getCurrentRoll().toString()); // must be here
+		turnTotalText.setText(currentGame.getActivePlayer().getTurnTotal().toString()); // must be here
 	}
 
 }

@@ -39,6 +39,7 @@ public class Main extends Application {
 
 			// Closing the program - Saving game and player data
 			primaryStage.setOnCloseRequest(event -> {
+				System.out.println("closing");
 				writeGameResultsToFile();
 				writePlayersToFile();
 				Platform.exit();
