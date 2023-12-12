@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuBar;
@@ -55,6 +54,9 @@ public class PigController implements ControlsListener {
 	@FXML
 	private Image die1 = new Image("orange1.png");
 	
+	/**************************************
+	 * Methods for button controls
+	 * ************************************/
 	public void newGameMenuItem() throws IOException {
 		this.currentGame = null;
 		displayPlayerSelect();
@@ -65,11 +67,10 @@ public class PigController implements ControlsListener {
 		AnchorPane playerSelectDialogue = loader.load();
 		PlayerSelectDialogueController playerSelectController = loader.getController();
 		playerSelectController.setPigController(this);
-
 		Stage playerSelect = new Stage();
-		playerSelect.setScene(new Scene(playerSelectDialogue, 277, 300));
+		playerSelect.setScene(new Scene(playerSelectDialogue, 296, 297));
+		playerSelect.setTitle("Welcome to PIG");
 		playerSelect.initModality(Modality.APPLICATION_MODAL);
-
 		try {
 			Stage mainStage = (Stage) player1DieFace.getScene().getWindow();
 			playerSelect.initOwner(mainStage);
@@ -77,15 +78,14 @@ public class PigController implements ControlsListener {
 			e.printStackTrace();
 			System.out.println("Didn't work");
 		}
-
 		playerSelect.show();
 	}
 	
 	public void openDisplayGameHistory() throws IOException {
-		AnchorPane createPlayerDialogue = (AnchorPane) FXMLLoader
+		AnchorPane gameHistory = (AnchorPane) FXMLLoader
 				.load(getClass().getResource("DisplayGameHistory.fxml"));
 		Stage displayGameHistory = new Stage();
-		displayGameHistory.setScene(new Scene(createPlayerDialogue, 400, 500));
+		displayGameHistory.setScene(new Scene(gameHistory, 400, 500));
 		displayGameHistory.initModality(Modality.APPLICATION_MODAL);
 		try {
 			Stage playerSelect = (Stage) menuBar.getScene().getWindow();
@@ -101,7 +101,23 @@ public class PigController implements ControlsListener {
 	    stage.getOnCloseRequest().handle(null);
 	    stage.close();
 	}
+	
+	public void displayWinnerCongratulations() throws IOException {
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("WinnerCongratulation.fxml"));
+		Parent root = loader.load();
+		WinnerCongratulationController winnerCongrats = loader.getController();
+		winnerCongrats.initialize(this);
+		winnerCongrats.setWinnerText(currentGame.getWinner());
+		Stage displayWinnerCongrats = new Stage();
+		displayWinnerCongrats.setScene(new Scene(root, 250, 65));
+		displayWinnerCongrats.setTitle("Congratulations!");
+		displayWinnerCongrats.show();
+	}
 
+	/***********************************************
+	 * Initialization and game setting controls
+	 * *********************************************/
+	
 	public void initialize() throws IOException {
 		player1DieFace.setImage(die1);
 		player2DieFace.setImage(die1);
@@ -124,7 +140,15 @@ public class PigController implements ControlsListener {
 		updateUIAfterTurn();
 		callback.onGameReady();
 	}
+	
+	public Game getCurrentGame() {
+		return currentGame;
+	}
 
+	/****************************
+	 * Gameplay methods
+	 * **************************/
+	
 	public void rollAgain() {
 		this.onDieRoll();
 	}
@@ -137,7 +161,8 @@ public class PigController implements ControlsListener {
 		currentGame.playGame();
 	}
 
-	public void endGame() {
+	public void endGame() throws IOException {
+		displayWinnerCongratulations();
 		Date date = new Date();
 		games.add(new CompletedGame(date, currentGame.getWinner(), currentGame.getWinner().getGameTotal(), true));
 		games.add(new CompletedGame(date, currentGame.getLoser(), currentGame.getLoser().getGameTotal(), false));
@@ -165,7 +190,12 @@ public class PigController implements ControlsListener {
     	System.out.println("from onTurnEnd: it's your turn");
     	updateUIAfterTurn();
 		if (currentGame.getWinner() != null) {
-			endGame();
+			try {
+				endGame();
+			} catch (IOException e) {
+				System.out.println("problem with endGame in onTurnEnd");
+				e.printStackTrace();
+			}
 		}
 	}
 	

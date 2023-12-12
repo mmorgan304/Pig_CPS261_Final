@@ -2,21 +2,14 @@ package application;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.stream.Collectors;
-
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.util.StringConverter;
-import javafx.util.converter.DateStringConverter;
 
 public class DisplayGameHistoryController {
 	ArrayList<CompletedGame> games = DataManager.getInstance().getGameResults();

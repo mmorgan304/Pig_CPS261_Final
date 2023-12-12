@@ -39,6 +39,56 @@ public class PlayerSelectDialogueController implements GameReadyCallback{
 	@FXML
 	public ToggleGroup gameTypeSelection;
 
+	/**********************
+	 * Button controls
+	 * ********************/
+	public void openPlayerCreateDialogue() throws IOException {
+		AnchorPane createPlayerDialogue = (AnchorPane) FXMLLoader
+				.load(getClass().getResource("CreatePlayerDialogue.fxml"));
+		Stage createPlayer = new Stage();
+		createPlayer.setScene(new Scene(createPlayerDialogue, 400, 50));
+		createPlayer.initModality(Modality.APPLICATION_MODAL);
+		try {
+			Stage playerSelect = (Stage) createNewPlayerButton.getScene().getWindow();
+			createPlayer.initOwner(playerSelect);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		createPlayer.show();
+	}
+	
+	public void openDisplayGameHistory() throws IOException {
+		AnchorPane createPlayerDialogue = (AnchorPane) FXMLLoader
+				.load(getClass().getResource("DisplayGameHistory.fxml"));
+		Stage displayGameHistory = new Stage();
+		displayGameHistory.setScene(new Scene(createPlayerDialogue, 400, 500));
+		displayGameHistory.initModality(Modality.APPLICATION_MODAL);
+		try {
+			Stage playerSelect = (Stage) viewStatisticsButton.getScene().getWindow();
+			displayGameHistory.initOwner(playerSelect);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		displayGameHistory.show();
+	}
+	
+	public void handlePlayer1List() throws IOException, ClassNotFoundException {
+		ArrayList<String> playerNameStrings = new ArrayList<String>();
+		players.forEach(playerName -> playerNameStrings.add(playerName.getPlayerName()));
+		ObservableList<String> playerNameList = FXCollections.observableArrayList(playerNameStrings);
+		player1ComboBox.setItems(playerNameList);
+	}
+
+	public void handlePlayer2List() throws IOException, ClassNotFoundException {
+		ArrayList<String> playerNameStrings = new ArrayList<String>();
+		players.forEach(playerName -> playerNameStrings.add(playerName.getPlayerName()));
+		ObservableList<String> playerNameList = FXCollections.observableArrayList(playerNameStrings);
+		player2ComboBox.setItems(playerNameList);
+	}
+
+	/***************************
+	 * Initialization controls
+	 * *************************/
 	@FXML
 	public void initialize() throws IOException {
 		try {
@@ -58,63 +108,14 @@ public class PlayerSelectDialogueController implements GameReadyCallback{
 		});
 		gameTypeSelection.selectToggle(onePlayerGameToggle);
 	}
-
+	
 	public void setPigController(PigController pigController) {
 		this.pigController = pigController;
 	}
 
-	public void displayPlayerCreate() throws IOException {
-		AnchorPane createPlayerDialogue = (AnchorPane) FXMLLoader
-				.load(getClass().getResource("CreatePlayerDialogue.fxml"));
-		Stage createPlayer = new Stage();
-		createPlayer.setScene(new Scene(createPlayerDialogue, 400, 50));
-		createPlayer.initModality(Modality.APPLICATION_MODAL);
-		try {
-			Stage playerSelect = (Stage) createNewPlayerButton.getScene().getWindow();
-			createPlayer.initOwner(playerSelect);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		createPlayer.show();
-	}
-
-	public void openPlayerCreateDialogue() {
-		try {
-			displayPlayerCreate();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void openDisplayGameHistory() throws IOException {
-		AnchorPane createPlayerDialogue = (AnchorPane) FXMLLoader
-				.load(getClass().getResource("DisplayGameHistory.fxml"));
-		Stage displayGameHistory = new Stage();
-		displayGameHistory.setScene(new Scene(createPlayerDialogue, 400, 500));
-		displayGameHistory.initModality(Modality.APPLICATION_MODAL);
-		try {
-			Stage playerSelect = (Stage) viewStatisticsButton.getScene().getWindow();
-			displayGameHistory.initOwner(playerSelect);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		displayGameHistory.show();
-	}
-
-	public void handlePlayer1List() throws IOException, ClassNotFoundException {
-		ArrayList<String> playerNameStrings = new ArrayList<String>();
-		players.forEach(playerName -> playerNameStrings.add(playerName.getPlayerName()));
-		ObservableList<String> playerNameList = FXCollections.observableArrayList(playerNameStrings);
-		player1ComboBox.setItems(playerNameList);
-	}
-
-	public void handlePlayer2List() throws IOException, ClassNotFoundException {
-		ArrayList<String> playerNameStrings = new ArrayList<String>();
-		players.forEach(playerName -> playerNameStrings.add(playerName.getPlayerName()));
-		ObservableList<String> playerNameList = FXCollections.observableArrayList(playerNameStrings);
-		player2ComboBox.setItems(playerNameList);
-	}
-
+	/***************************
+	 * New game start methods
+	 * *************************/
 	public void startNewGame() {
 		try {
 			if (onePlayerGameToggle.isSelected()) {
