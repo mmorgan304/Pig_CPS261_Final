@@ -137,8 +137,8 @@ public class PlayerSelectDialogueController implements GameReadyCallback{
 					Player selectedPlayer1 = Player.getPlayerByName(selectedPlayer1Name, players);
 					Player selectedPlayer2 = Player.getPlayerByName(selectedPlayer2Name, players);
 					TwoPlayerGame newGame = new TwoPlayerGame(currentDate, selectedPlayer1, selectedPlayer2);
+					System.out.println("Game instantiated");
 					pigController.setGame(newGame, this);
-
 				} else {
 					System.out.println("Please select a player for the game.");
 				}

@@ -2,9 +2,19 @@ package application;
 
 import java.util.Date;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
+
+import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
+import javafx.util.Duration;
 
 public abstract class Game {
 	protected ControlsListener controlsListener;
+
 	static Random die = new Random();
 	protected Player player1;
 	protected Player player2;
@@ -84,8 +94,7 @@ public abstract class Game {
 	}
 
 	public void endTurn() {
-		checkWinner();
-		switchActivePlayer();
+		switchPlayer(getActivePlayer(), getInactivePlayer());
 	}
 
 	public void onEndTurn() {
@@ -99,15 +108,14 @@ public abstract class Game {
 			return player2;
 	}
 
-	public void switchActivePlayer() {
+	public Player getInactivePlayer() {
 		if (player1.isActive()) {
-			switchPlayer(player1, player2);
-		} else if (player2.isActive()) {
-			switchPlayer(player2, player1);
-		}
+			return player2;
+		} else
+			return player1;
 	}
 
-	private void switchPlayer(Player currentPlayer, Player nextPlayer) {
+	public void switchPlayer(Player currentPlayer, Player nextPlayer) {
 		currentPlayer.setActive(false);
 		nextPlayer.setActive(true);
 	}
@@ -115,9 +123,9 @@ public abstract class Game {
 	public void playGame() {
 		player1.setActive(true);
 		player2.setActive(false);
-		controlsListener.onDieRoll();
+		controlsListener.updateUIAfterTurn();
 	}
-	
+
 	public void checkWinner() {
 		if (player1.getGameTotal() >= 100) {
 			setWinner(player1);
@@ -127,7 +135,6 @@ public abstract class Game {
 			setLoser(player1);
 		}
 		if (getWinner() != null) {
-			System.out.println(getWinner().getPlayerName() + " wins!");
 		}
 	}
 
@@ -139,46 +146,51 @@ public abstract class Game {
 		}
 	}
 
+	public void playerEndTurn() {
+		getActivePlayer().setGameTotal(getActivePlayer().getGameTotal() + getActivePlayer().getTurnTotal());
+		setPlayerGameScore(getActivePlayer().getGameTotal());
+		controlsListener.updateRunningScores();
+		getActivePlayer().setCurrentRoll(0);
+		getActivePlayer().setTurnTotal(0);
+		endTurn();
+		controlsListener.updateUIAfterTurn();
+	}
+
 	public void humanTurn() {
 		Integer result = dieRoll();
 		getActivePlayer().setCurrentRoll(result);
 		if (result == 1) {
+			controlsListener.updateUIAfterRoll(result);
 			getActivePlayer().setTurnTotal(0);
-			playerEndTurn();
+			controlsListener.onTurnEnd();
 		} else if (result > 1) {
 			getActivePlayer().setTurnTotal(getActivePlayer().getTurnTotal() + result);
+			controlsListener.updateUIAfterRoll(result);
 		}
-	}
-
-	public void playerEndTurn() {
-		getActivePlayer().setGameTotal(getActivePlayer().getGameTotal() + getActivePlayer().getTurnTotal());
-		setPlayerGameScore(getActivePlayer().getGameTotal());
-		switchActivePlayer();
-		getActivePlayer().setCurrentRoll(0);
-		getActivePlayer().setTurnTotal(0);
-		controlsListener.updateUIAfterTurn();
 	}
 
 	public void computerTurn() {
-		while (player2.isActive()) {
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		Timeline timeline = new Timeline();
+		timeline.setCycleCount(Timeline.INDEFINITE);
+		KeyFrame keyFrame = new KeyFrame(Duration.seconds(2), event -> {
+			Integer computerResult = dieRoll();
+			getActivePlayer().setCurrentRoll(computerResult);
 
-			Integer result = dieRoll();
-			getActivePlayer().setCurrentRoll(result);
-			if (result == 1) {
+			if (computerResult == 1) {
+				controlsListener.updateUIAfterRoll(computerResult);
 				getActivePlayer().setTurnTotal(0);
-				playerEndTurn();
-			} else if (result > 1) {
-				getActivePlayer().setTurnTotal(getActivePlayer().getTurnTotal() + result);
-				controlsListener.updateUIAfterTurn();
+				controlsListener.onTurnEnd();
+				timeline.stop();
+			} else if (computerResult > 1) {
+				getActivePlayer().setTurnTotal(getActivePlayer().getTurnTotal() + computerResult);
+				controlsListener.updateUIAfterRoll(computerResult);
 				if (getActivePlayer().getTurnTotal() >= 20) {
-					playerEndTurn();
+					controlsListener.onTurnEnd();
+					timeline.stop();
 				}
 			}
-		}
+		});
+		timeline.getKeyFrames().add(keyFrame);
+		timeline.play();
 	}
 }

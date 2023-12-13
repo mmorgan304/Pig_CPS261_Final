@@ -4,36 +4,50 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javafx.animation.RotateTransition;
+import javafx.animation.SequentialTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.HPos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class PigController implements ControlsListener {
 
 	ArrayList<CompletedGame> games = DataManager.getInstance().getGameResults();
 	private Game currentGame;
-	
+	ArrayList<Integer> player1GameTotals = new ArrayList<Integer>();
+	ArrayList<Integer> player2GameTotals = new ArrayList<Integer>();
+	@FXML
+	Image[] diceFaces = new Image[] { new Image("orange1.png"), new Image("orange2.png"), new Image("orange3.png"),
+			new Image("orange4.png"), new Image("orange5.png"), new Image("orange6.png") };
+
 	@FXML
 	private MenuBar menuBar;
-	
+
+	@FXML
+	private Text turnIndicatorText;
 	@FXML
 	private ImageView player1DieFace;
 	@FXML
-	private ImageView player2DieFace;
-
+	private GridPane gameScoreRunningTotals;
 	@FXML
-	private Text player1DieText;
+	private ColumnConstraints player1GameScoreColumn;
 	@FXML
-	private Text player2DieText;
+	private ColumnConstraints player2GameScoreColumn;
 	@FXML
 	private Text player1ScoreNameText;
 	@FXML
@@ -43,23 +57,21 @@ public class PigController implements ControlsListener {
 	private Text currentRollText;
 	@FXML
 	private Text turnTotalText;
-	@FXML
-	private Text turnIndicatorText;
 
 	@FXML
 	private Button rollAgainButton;
 	@FXML
 	private Button holdButton;
 
-	@FXML
-	private Image die1 = new Image("orange1.png");
-	
 	/**************************************
 	 * Methods for button controls
-	 * ************************************/
+	 ************************************/
 	public void newGameMenuItem() throws IOException {
 		this.currentGame = null;
+		player1GameTotals.clear();
+		player2GameTotals.clear();
 		displayPlayerSelect();
+		updateRunningScores();
 	}
 
 	public void displayPlayerSelect() throws IOException {
@@ -80,10 +92,9 @@ public class PigController implements ControlsListener {
 		}
 		playerSelect.show();
 	}
-	
+
 	public void openDisplayGameHistory() throws IOException {
-		AnchorPane gameHistory = (AnchorPane) FXMLLoader
-				.load(getClass().getResource("DisplayGameHistory.fxml"));
+		AnchorPane gameHistory = (AnchorPane) FXMLLoader.load(getClass().getResource("DisplayGameHistory.fxml"));
 		Stage displayGameHistory = new Stage();
 		displayGameHistory.setScene(new Scene(gameHistory, 400, 500));
 		displayGameHistory.initModality(Modality.APPLICATION_MODAL);
@@ -95,13 +106,27 @@ public class PigController implements ControlsListener {
 		}
 		displayGameHistory.show();
 	}
-		
-	public void quitGameMenuItem() {
-	    Stage stage  = (Stage) menuBar.getScene().getWindow();
-	    stage.getOnCloseRequest().handle(null);
-	    stage.close();
-	}
 	
+	public void openRules() throws IOException {
+		StackPane rules = (StackPane) FXMLLoader.load(getClass().getResource("Rules.fxml"));
+		Stage displayRules = new Stage();
+		displayRules.setScene(new Scene(rules, 400, 500));
+		displayRules.initModality(Modality.APPLICATION_MODAL);
+		try {
+			Stage playerSelect = (Stage) menuBar.getScene().getWindow();
+			displayRules.initOwner(playerSelect);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		displayRules.show();
+	}
+
+	public void quitGameMenuItem() {
+		Stage stage = (Stage) menuBar.getScene().getWindow();
+		stage.getOnCloseRequest().handle(null);
+		stage.close();
+	}
+
 	public void displayWinnerCongratulations() throws IOException {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("WinnerCongratulation.fxml"));
 		Parent root = loader.load();
@@ -116,13 +141,10 @@ public class PigController implements ControlsListener {
 
 	/***********************************************
 	 * Initialization and game setting controls
-	 * *********************************************/
-	
+	 *********************************************/
+
 	public void initialize() throws IOException {
-		player1DieFace.setImage(die1);
-		player2DieFace.setImage(die1);
-		player1DieText.setText("");
-		player2DieText.setText("");
+		player1DieFace.setImage(diceFaces[0]);
 		player1ScoreNameText.setText("");
 		player2ScoreNameText.setText("");
 		turnIndicatorText.setText("");
@@ -133,22 +155,19 @@ public class PigController implements ControlsListener {
 	public void setGame(Game game, GameReadyCallback callback) {
 		this.currentGame = game;
 		currentGame.setControlsListener(this);
-		player1DieText.setText(game.player1.getPlayerName());
-		player2DieText.setText(game.player2.getPlayerName());
 		player1ScoreNameText.setText(game.player1.getPlayerName());
 		player2ScoreNameText.setText(game.player2.getPlayerName());
-		updateUIAfterTurn();
 		callback.onGameReady();
 	}
-	
+
 	public Game getCurrentGame() {
 		return currentGame;
 	}
 
 	/****************************
 	 * Gameplay methods
-	 * **************************/
-	
+	 **************************/
+
 	public void rollAgain() {
 		this.onDieRoll();
 	}
@@ -168,27 +187,20 @@ public class PigController implements ControlsListener {
 		games.add(new CompletedGame(date, currentGame.getLoser(), currentGame.getLoser().getGameTotal(), false));
 	}
 
-	@Override
 	public void onDieRoll() {
-		System.out.println(currentGame.getPlayer1().getPlayerName() + ": " + currentGame.player1.getGameTotal());
-		System.out.println(currentGame.getPlayer2().getPlayerName() + ": " + currentGame.player2.getGameTotal());
-		if (currentGame.getActivePlayer() instanceof ComputerPlayer) {
-		} else {
-			System.out.println("from onDieRoll: it's still your turn");
-			updateUIAfterTurn();
+			setDieFace(1);
 			currentGame.humanTurn();
-			updateUIAfterTurn();
-		}
 	}
 
 	@Override
 	public void onTurnEnd() {
 		currentGame.playerEndTurn();
-		updateUIAfterTurn();
-		triggerComputerTurn();
+		try {
+			triggerComputerTurn();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		currentGame.checkWinner();
-    	System.out.println("from onTurnEnd: it's your turn");
-    	updateUIAfterTurn();
 		if (currentGame.getWinner() != null) {
 			try {
 				endGame();
@@ -198,20 +210,69 @@ public class PigController implements ControlsListener {
 			}
 		}
 	}
-	
-	public void triggerComputerTurn() {
-	    if (currentGame.getActivePlayer() instanceof ComputerPlayer) {
-	    	System.out.println("from triggerComputerTurn: it's the computer's turn");
-	    	updateUIAfterTurn();
-	        currentGame.computerTurn();
-	    }
+
+	public void triggerComputerTurn() throws InterruptedException {
+		if (currentGame.getActivePlayer() instanceof ComputerPlayer) {
+			currentGame.computerTurn();
+		}
 	}
-	
+
+	/****************
+	 * UI methods
+	 **************/
+
+	public void setDieFace(Integer result) {
+		RotateTransition rotate = new RotateTransition(Duration.millis(1000), player1DieFace);
+		rotate.setByAngle(720);
+		rotate.setOnFinished(e -> {
+			player1DieFace.setImage(diceFaces[result - 1]);
+			updateRestofUIAfterRoll();
+		});
+	    rotate.play();
+	}
+
+	public void addToRunningTotals() {
+		if (currentGame != null) {
+			if (currentGame.player1.isActive()) {
+				player1GameTotals.add(currentGame.getActivePlayer().getGameTotal());
+			} else if (currentGame.player2.isActive()) {
+				player2GameTotals.add(currentGame.getActivePlayer().getGameTotal());
+			}
+		}
+	}
+
+	@Override
+	public void updateRunningScores() {
+		gameScoreRunningTotals.getChildren().clear();
+		addToRunningTotals();
+		updateColumn(player1GameTotals, "player1GameScoreColumn", 0);
+		updateColumn(player2GameTotals, "player2GameScoreColumn", 1);
+	}
+
+	private void updateColumn(ArrayList<Integer> scores, String columnFxId, int columnIndex) {
+		int rowIndex = 0;
+		for (Integer score : scores) {
+			Label scoreLabel = new Label(score.toString());
+			gameScoreRunningTotals.add(scoreLabel, columnIndex, rowIndex);
+			GridPane.setHalignment(scoreLabel, HPos.CENTER);
+			rowIndex++;
+		}
+	}
+
+	@Override
+	public void updateUIAfterRoll(Integer result) {
+		setDieFace(result);
+	}
+	public void updateRestofUIAfterRoll() {
+		currentRollText.setText(currentGame.getActivePlayer().getCurrentRoll().toString());
+		turnTotalText.setText(currentGame.getActivePlayer().getTurnTotal().toString());
+	}
+
 	@Override
 	public void updateUIAfterTurn() {
-		turnIndicatorText.setText(currentGame.getActivePlayer().getPlayerName() + "'s Turn"); // must be here
-		currentRollText.setText(currentGame.getActivePlayer().getCurrentRoll().toString()); // must be here
-		turnTotalText.setText(currentGame.getActivePlayer().getTurnTotal().toString()); // must be here
+		turnIndicatorText.setText(currentGame.getActivePlayer().getPlayerName() + "'s Turn");
+		currentRollText.setText(currentGame.getActivePlayer().getCurrentRoll().toString());
+		turnTotalText.setText(currentGame.getActivePlayer().getTurnTotal().toString());
 	}
 
 }
