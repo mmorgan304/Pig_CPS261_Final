@@ -1,12 +1,12 @@
 package application;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.scene.text.Text;
 
 public class RulesController {
 	
 	@FXML
-	Label rules;
+	Text rules;
 	
 	@FXML
 	private void initialize() {

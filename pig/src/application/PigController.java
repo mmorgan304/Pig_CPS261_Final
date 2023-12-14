@@ -3,9 +3,7 @@ package application;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-
 import javafx.animation.RotateTransition;
-import javafx.animation.SequentialTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
@@ -67,7 +65,6 @@ public class PigController implements ControlsListener {
 	 * Methods for button controls
 	 ************************************/
 	public void newGameMenuItem() throws IOException {
-		this.currentGame = null;
 		player1GameTotals.clear();
 		player2GameTotals.clear();
 		displayPlayerSelect();
@@ -106,11 +103,11 @@ public class PigController implements ControlsListener {
 		}
 		displayGameHistory.show();
 	}
-	
+
 	public void openRules() throws IOException {
 		StackPane rules = (StackPane) FXMLLoader.load(getClass().getResource("Rules.fxml"));
 		Stage displayRules = new Stage();
-		displayRules.setScene(new Scene(rules, 400, 500));
+		displayRules.setScene(new Scene(rules, 400, 250));
 		displayRules.initModality(Modality.APPLICATION_MODAL);
 		try {
 			Stage playerSelect = (Stage) menuBar.getScene().getWindow();
@@ -119,6 +116,20 @@ public class PigController implements ControlsListener {
 			e.printStackTrace();
 		}
 		displayRules.show();
+	}
+
+	public void openAbout() throws IOException {
+		StackPane about = (StackPane) FXMLLoader.load(getClass().getResource("About.fxml"));
+		Stage displayAbout = new Stage();
+		displayAbout.setScene(new Scene(about, 400, 250));
+		displayAbout.initModality(Modality.APPLICATION_MODAL);
+		try {
+			Stage playerSelect = (Stage) menuBar.getScene().getWindow();
+			displayAbout.initOwner(playerSelect);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		displayAbout.show();
 	}
 
 	public void quitGameMenuItem() {
@@ -185,21 +196,18 @@ public class PigController implements ControlsListener {
 		Date date = new Date();
 		games.add(new CompletedGame(date, currentGame.getWinner(), currentGame.getWinner().getGameTotal(), true));
 		games.add(new CompletedGame(date, currentGame.getLoser(), currentGame.getLoser().getGameTotal(), false));
+		currentGame.player1.setActive(false);
+		currentGame.player2.setActive(false);
 	}
 
 	public void onDieRoll() {
-			setDieFace(1);
-			currentGame.humanTurn();
+		setDieFace(1);
+		currentGame.humanTurn();
 	}
 
 	@Override
 	public void onTurnEnd() {
 		currentGame.playerEndTurn();
-		try {
-			triggerComputerTurn();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		currentGame.checkWinner();
 		if (currentGame.getWinner() != null) {
 			try {
@@ -208,11 +216,17 @@ public class PigController implements ControlsListener {
 				System.out.println("problem with endGame in onTurnEnd");
 				e.printStackTrace();
 			}
+		} else {
+			try {
+				triggerComputerTurn();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
 	public void triggerComputerTurn() throws InterruptedException {
-		if (currentGame.getActivePlayer() instanceof ComputerPlayer) {
+		if (currentGame != null && currentGame.getActivePlayer() instanceof ComputerPlayer) {
 			currentGame.computerTurn();
 		}
 	}
@@ -228,16 +242,14 @@ public class PigController implements ControlsListener {
 			player1DieFace.setImage(diceFaces[result - 1]);
 			updateRestofUIAfterRoll();
 		});
-	    rotate.play();
+		rotate.play();
 	}
 
 	public void addToRunningTotals() {
-		if (currentGame != null) {
-			if (currentGame.player1.isActive()) {
-				player1GameTotals.add(currentGame.getActivePlayer().getGameTotal());
-			} else if (currentGame.player2.isActive()) {
-				player2GameTotals.add(currentGame.getActivePlayer().getGameTotal());
-			}
+		if (currentGame.player1.isActive()) {
+			player1GameTotals.add(currentGame.getActivePlayer().getGameTotal());
+		} else if (currentGame.player2.isActive()) {
+			player2GameTotals.add(currentGame.getActivePlayer().getGameTotal());
 		}
 	}
 
@@ -263,6 +275,7 @@ public class PigController implements ControlsListener {
 	public void updateUIAfterRoll(Integer result) {
 		setDieFace(result);
 	}
+
 	public void updateRestofUIAfterRoll() {
 		currentRollText.setText(currentGame.getActivePlayer().getCurrentRoll().toString());
 		turnTotalText.setText(currentGame.getActivePlayer().getTurnTotal().toString());

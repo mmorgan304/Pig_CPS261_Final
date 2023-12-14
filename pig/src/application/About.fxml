@@ -6,11 +6,11 @@
 <?import javafx.scene.text.TextFlow?>
 
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.RulesController">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.AboutController">
    <children>
       <TextFlow prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: lightgreen;">
          <children>
-            <Text fx:id="rules" strokeType="OUTSIDE" strokeWidth="0.0" />
+            <Text fx:id="about" strokeType="OUTSIDE" strokeWidth="0.0" />
          </children>
          <StackPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

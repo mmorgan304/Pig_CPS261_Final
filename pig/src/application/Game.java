@@ -2,14 +2,8 @@ package application;
 
 import java.util.Date;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.CountDownLatch;
-
 import javafx.animation.KeyFrame;
-import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.util.Duration;
 
 public abstract class Game {
@@ -23,6 +17,10 @@ public abstract class Game {
 	protected Player loser;
 	private Integer player1Score;
 	private Integer player2Score;
+	
+	public Game() {
+		
+	}
 
 	public Game(Date gameDate) {
 		super();
@@ -102,10 +100,10 @@ public abstract class Game {
 	}
 
 	public Player getActivePlayer() {
-		if (player1.isActive()) {
-			return player1;
-		} else
+		if (player2.isActive()) {
 			return player2;
+		} else
+			return player1;
 	}
 
 	public Player getInactivePlayer() {
@@ -130,9 +128,13 @@ public abstract class Game {
 		if (player1.getGameTotal() >= 100) {
 			setWinner(player1);
 			setLoser(player2);
+			player1.setActive(false);
+			player2.setActive(false);
 		} else if (player2.getGameTotal() >= 100) {
 			setWinner(player2);
 			setLoser(player1);
+			player1.setActive(false);
+			player2.setActive(false);
 		}
 		if (getWinner() != null) {
 		}
